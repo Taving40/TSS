@@ -1,11 +1,10 @@
 import sqlite3
 
-
 # making connection with database
-def connect_database():
+def connect_database(db_path):
     global conn
     global cur
-    conn = sqlite3.connect("bankmanaging.db")
+    conn = sqlite3.connect(db_path)
 
     cur = conn.cursor()
 
@@ -246,3 +245,4 @@ def check_name_in_staff(name):
         if i[0] == name:
             return True
     return False
+
