@@ -40,9 +40,9 @@ def check_admin(name, password):
 
 
 # create employee in database
-def create_employee(name, password, salary, positon):
+def create_employee(name, password, salary, position):
     print(password)
-    cur.execute("insert into staff values(?,?,?,?)", (name, password, salary, positon))
+    cur.execute("insert into staff values(?,?,?,?)", (name, password, salary, position))
     conn.commit()
 
 

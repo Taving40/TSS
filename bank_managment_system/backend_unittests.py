@@ -102,15 +102,24 @@ class BackendUnitTests(unittest.TestCase):
         self.assertIsNone(backend.check_admin("not_an_admin", "not_an_admin"))
 
     def test_create_employee(self):
-        # copyfile(src="db_stubs/test_empty_db.db",
-        #          dst="db_stubs/test_employee_insert.db")
+        copyfile(src="db_stubs/test_create_employee.db",
+                 dst="db_stubs/test_create_employee_copy.db")
 
-        # backend.conn = sqlite3.connect("db_stubs/test_employee_insert.db")
+        backend.conn = sqlite3.connect("db_stubs/test_create_employee_copy.db")
+        backend.cur = backend.conn.cursor()
+        backend.create_employee(name="name", password="password", salary=1, position="position")
+        
+        dump_db("db_stubs/test_create_employee_copy.db", "test_create_employee.sql")
 
-        # self.assertTrue(filecmp.cmp(
-        #     "db_stubs/test_create_employee.db",
-        #     "db_stubs/test_create_employee_check.db"))
-        pass
+        self.assertTrue(filecmp.cmp(
+            "test_create_employee.sql",
+            "db_stubs/checks/test_create_employee_check.sql"))
+        
+        #cleanup
+        backend.conn.close()
+        os.remove("test_create_employee.sql")
+        os.remove("db_stubs/test_create_employee_copy.db")
+
 
     def test_check_employee(self):
         pass
