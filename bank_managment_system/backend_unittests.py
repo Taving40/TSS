@@ -5,54 +5,91 @@ from unittest.mock import patch, MagicMock
 import backend
 import filecmp
 from dump_db import dump_db
+from shutil import copyfile
 
 #NOTE: remember to keep each test entirely self-contained
 #NOTE: functions that are explicitly supposed to modify the database will be tested using stubs
 #      (in db_stubs subdirectory) since the actual thing being tested is the query 
+#NOTE: the stub dbs in db_stubs shouldnt be worked with directly, but instead a copy should be made and worked with
 
 class BackendUnitTests(unittest.TestCase):
 
     #test that the global connection object is initialized properly
     def test_connect_database_connection(self):
-        backend.connect_database("db_stubs/test_empty.db") #call the function
+        #make a copy of the stub
+        copyfile(src="db_stubs/test_connect_database_connection.db",
+                 dst="db_stubs/test_connect_database_connection_copy.db")
+
+        backend.connect_database("db_stubs/test_connect_database_connection_copy.db") #call the function
         self.assertIsInstance(backend.conn, sqlite3.Connection) #check if it is the appropriate class
+
+        #cleanup
+        backend.conn.close()
+        os.remove("db_stubs/test_connect_database_connection_copy.db")
 
     #test that the global cursor object for the connection is initialized properly
     def test_connect_database_cursor(self):
-        backend.connect_database("db_stubs/test_empty.db")
+        #make a copy of the stub
+        copyfile(src="db_stubs/test_connect_database_cursor.db",
+                 dst="db_stubs/test_connect_database_cursor_copy.db")
+
+        backend.connect_database("db_stubs/test_connect_database_cursor_copy.db")
         self.assertIsInstance(backend.cur, sqlite3.Cursor)
+
+        #cleanup
+        backend.conn.close()
+        os.remove("db_stubs/test_connect_database_cursor_copy.db")
 
     #test that the global account number object is initialized properly
     def test_connect_database_account_number(self): 
-        backend.connect_database("db_stubs/test_empty.db")
+        #make a copy of the stub
+        copyfile(src="db_stubs/test_connect_database_account_number.db",
+                 dst="db_stubs/test_connect_database_account_number_copy.db")
+
+        backend.connect_database("db_stubs/test_connect_database_account_number_copy.db")
         self.assertIsInstance(backend.acc_no, int)
 
+        #cleanup
+        backend.conn.close()
+        os.remove("db_stubs/test_connect_database_account_number_copy.db")
+
     #test that the global account number object has proper value
-    def test_connect_database_account_number(self): 
-        backend.connect_database("db_stubs/test_empty.db")
+    def test_connect_database_account_number_value(self):
+        #make a copy of the stub
+        copyfile(src="db_stubs/test_connect_database_account_number_value.db",
+                 dst="db_stubs/test_connect_database_account_number_value_copy.db")
+
+        backend.connect_database("db_stubs/test_connect_database_account_number_value_copy.db")
         self.assertGreater(backend.acc_no, 0)
+
+        #cleanup
+        backend.conn.close()
+        os.remove("db_stubs/test_connect_database_account_number_value_copy.db")
 
     #test that all the tables were created
     def test_connect_database_table_creation(self):
-        #remove the stub if it exists for consistency
-        if os.path.exists("db_stubs/test_table_creation.db"):
-            os.remove("db_stubs/test_table_creation.db")
+        #make a copy of the stub
+        copyfile(src="db_stubs/test_connect_database_table_creation.db",
+                 dst="db_stubs/test_connect_database_table_creation_copy.db")
 
         #call the function 
-        backend.connect_database("db_stubs/test_table_creation.db")
+        backend.connect_database("db_stubs/test_connect_database_table_creation_copy.db")
         
         #dump the db so that it can be compared and check it against the pre-built dump
-        dump_db("db_stubs/test_table_creation.db", "test_table_creation.sql")
+        dump_db("db_stubs/test_connect_database_table_creation_copy.db", "test_table_creation.sql")
         self.assertTrue(filecmp.cmp(
             "test_table_creation.sql",
             "db_stubs/checks/test_table_creation_check.sql",
             shallow=False))
+        #cleanup
+        backend.conn.close()
+        os.remove("db_stubs/test_connect_database_table_creation_copy.db")
         os.remove("test_table_creation.sql")
 
     #NOTE: Having tested connect_database(), the rest of the tests can use mocks to avoid adding more database stubs (where possible)
 
     def test_check_admin(self):
-
+        backend.conn = MagicMock()
         backend.cur = MagicMock()
         backend.cur.fetchall = MagicMock( #mocking the call to the db that returns the admin credentials
             return_value =    
@@ -65,6 +102,11 @@ class BackendUnitTests(unittest.TestCase):
         self.assertIsNone(backend.check_admin("not_an_admin", "not_an_admin"))
 
     def test_create_employee(self):
+        # copyfile(src="db_stubs/test_empty_db.db",
+        #          dst="db_stubs/test_employee_insert.db")
+
+        # backend.conn = sqlite3.connect("db_stubs/test_employee_insert.db")
+
         # self.assertTrue(filecmp.cmp(
         #     "db_stubs/test_create_employee.db",
         #     "db_stubs/test_create_employee_check.db"))
