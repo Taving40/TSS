@@ -3,8 +3,12 @@ import sqlite3
 import os
 from unittest.mock import patch, MagicMock
 import backend
+import filecmp
+from dump_db import dump_db
 
-#NOTE: remember to keep each test entirely self-contained (dont)
+#NOTE: remember to keep each test entirely self-contained
+#NOTE: functions that are explicitly supposed to modify the database will be tested using stubs
+#      (in db_stubs subdirectory) since the actual thing being tested is the query 
 
 class BackendUnitTests(unittest.TestCase):
 
@@ -36,24 +40,14 @@ class BackendUnitTests(unittest.TestCase):
 
         #call the function 
         backend.connect_database("db_stubs/test_table_creation.db")
-
-        #get the names of the tables that have been created in the stub
-        def check_table_names():
-            conn = sqlite3.connect("db_stubs/test_table_creation.db")
-            cur = conn.cursor()
-            query = """SELECT name 
-                       FROM sqlite_master 
-                       WHERE type='table';"""
-            cur.execute(query)
-            tables = [ 
-                t[0] for t in cur.fetchall()
-                if t[0] != "sqlite_sequence"
-            ]
-            return tables
         
-        #check the names are equal to the intended ones
-        self.assertSetEqual(set(check_table_names()),
-                            set(["bank", "staff", "admin"]))
+        #dump the db so that it can be compared and check it against the pre-built dump
+        dump_db("db_stubs/test_table_creation.db", "test_table_creation.sql")
+        self.assertTrue(filecmp.cmp(
+            "test_table_creation.sql",
+            "db_stubs/checks/test_table_creation_check.sql",
+            shallow=False))
+        os.remove("test_table_creation.sql")
 
     #NOTE: Having tested connect_database(), the rest of the tests can use mocks to avoid adding more database stubs (where possible)
 
@@ -70,8 +64,10 @@ class BackendUnitTests(unittest.TestCase):
         self.assertTrue(backend.check_admin("arpit", "123"))
         self.assertIsNone(backend.check_admin("not_an_admin", "not_an_admin"))
 
-
     def test_create_employee(self):
+        # self.assertTrue(filecmp.cmp(
+        #     "db_stubs/test_create_employee.db",
+        #     "db_stubs/test_create_employee_check.db"))
         pass
 
     def test_check_employee(self):
