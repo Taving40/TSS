@@ -1,5 +1,8 @@
 import sqlite3
 
+conn = None
+cur = None
+
 # making connection with database
 def connect_database(db_path):
     global conn

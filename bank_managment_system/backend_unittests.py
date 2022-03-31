@@ -1,7 +1,8 @@
-from backend import *
 import unittest
 import sqlite3
 import os
+from unittest.mock import patch, MagicMock
+import backend
 
 #NOTE: remember to keep each test entirely self-contained (dont)
 
@@ -9,27 +10,23 @@ class BackendUnitTests(unittest.TestCase):
 
     #test that the global connection object is initialized properly
     def test_connect_database_connection(self):
-        connect_database("db_stubs/test_empty.db") #call the function
-        from backend import conn #reimport the global conn value to access the newly modified value
-        self.assertIsInstance(conn, sqlite3.Connection) #check if it is the appropriate class
+        backend.connect_database("db_stubs/test_empty.db") #call the function
+        self.assertIsInstance(backend.conn, sqlite3.Connection) #check if it is the appropriate class
 
     #test that the global cursor object for the connection is initialized properly
     def test_connect_database_cursor(self):
-        connect_database("db_stubs/test_empty.db")
-        from backend import cur
-        self.assertIsInstance(cur, sqlite3.Cursor)
+        backend.connect_database("db_stubs/test_empty.db")
+        self.assertIsInstance(backend.cur, sqlite3.Cursor)
 
     #test that the global account number object is initialized properly
     def test_connect_database_account_number(self): 
-        connect_database("db_stubs/test_empty.db")
-        from backend import acc_no
-        self.assertIsInstance(acc_no, int)
+        backend.connect_database("db_stubs/test_empty.db")
+        self.assertIsInstance(backend.acc_no, int)
 
     #test that the global account number object has proper value
     def test_connect_database_account_number(self): 
-        connect_database("db_stubs/test_empty.db")
-        from backend import acc_no
-        self.assertGreater(acc_no, 0)
+        backend.connect_database("db_stubs/test_empty.db")
+        self.assertGreater(backend.acc_no, 0)
 
     #test that all the tables were created
     def test_connect_database_table_creation(self):
@@ -38,18 +35,19 @@ class BackendUnitTests(unittest.TestCase):
             os.remove("db_stubs/test_table_creation.db")
 
         #call the function 
-        connect_database("db_stubs/test_table_creation.db")
+        backend.connect_database("db_stubs/test_table_creation.db")
 
         #get the names of the tables that have been created in the stub
         def check_table_names():
             conn = sqlite3.connect("db_stubs/test_table_creation.db")
             cur = conn.cursor()
-            query = """SELECT name FROM sqlite_master 
-                        WHERE type='table';"""
+            query = """SELECT name 
+                       FROM sqlite_master 
+                       WHERE type='table';"""
             cur.execute(query)
             tables = [ 
-                v[0] for v in cur.fetchall()
-                if v[0] != "sqlite_sequence"
+                t[0] for t in cur.fetchall()
+                if t[0] != "sqlite_sequence"
             ]
             return tables
         
@@ -57,10 +55,21 @@ class BackendUnitTests(unittest.TestCase):
         self.assertSetEqual(set(check_table_names()),
                             set(["bank", "staff", "admin"]))
 
-
+    #NOTE: Having tested connect_database(), the rest of the tests can use mocks to avoid adding more database stubs (where possible)
 
     def test_check_admin(self):
-        pass
+
+        backend.cur = MagicMock()
+        backend.cur.fetchall = MagicMock( #mocking the call to the db that returns the admin credentials
+            return_value =    
+                [
+                    ["arpit",
+                    "123"]
+                ]
+        )
+        self.assertTrue(backend.check_admin("arpit", "123"))
+        self.assertIsNone(backend.check_admin("not_an_admin", "not_an_admin"))
+
 
     def test_create_employee(self):
         pass

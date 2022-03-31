@@ -4,7 +4,7 @@ from tkinter import *
 
 import backend
 
-backend.connect_database()
+backend.connect_database("bankmanaging.db")
 
 
 # A function for check that acc_no is integer or not
