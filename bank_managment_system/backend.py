@@ -2,6 +2,8 @@ import sqlite3
 
 conn = None
 cur = None
+acc_no = None
+detail = None
 
 # making connection with database
 def connect_database(db_path):
@@ -41,18 +43,18 @@ def check_admin(name, password):
 
 # create employee in database
 def create_employee(name, password, salary, position):
-    print(password)
+    # print(password)
     cur.execute("insert into staff values(?,?,?,?)", (name, password, salary, position))
     conn.commit()
 
 
 # check employee details in dabase for employee login
 def check_employee(name, password):
-    print(password)
-    print(name)
+    # print(password)
+    # print(name)
     cur.execute("select name,pass from staff")
     data = cur.fetchall()
-    print(data)
+    # print(data)
     if len(data) == 0:
         return False
     for i in range(len(data)):
@@ -90,7 +92,7 @@ def get_details(acc_no):
     cur.execute("select * from bank where acc_no=?", (acc_no))
     global detail
     detail = cur.fetchall()
-    print(detail)
+    # print(detail)
     if len(detail) == 0:
         return False
     else:
@@ -140,21 +142,21 @@ def check_balance(acc_no):
 
 # update_name_in_bank_table
 def update_name_in_bank_table(new_name, acc_no):
-    print(new_name)
+    # print(new_name)
     conn.execute("update bank set name='{}' where acc_no={}".format(new_name, acc_no))
     conn.commit()
 
 
 # update_age_in_bank_table
 def update_age_in_bank_table(new_name, acc_no):
-    print(new_name)
+    # print(new_name)
     conn.execute("update bank set age={} where acc_no={}".format(new_name, acc_no))
     conn.commit()
 
 
 # update_address_in_bank_table
 def update_address_in_bank_table(new_name, acc_no):
-    print(new_name)
+    # print(new_name)
     conn.execute(
         "update bank set address='{}' where acc_no={}".format(new_name, acc_no)
     )
@@ -186,7 +188,7 @@ def show_employees():
 def all_money():
     cur.execute("select balance from bank")
     bal = cur.fetchall()
-    print(bal)
+    # print(bal)
     if len(bal) == 0:
         return False
     else:
@@ -205,19 +207,19 @@ def show_employees_for_update():
 
 # update employee name from data base
 def update_employee_name(new_name, old_name):
-    print(new_name, old_name)
+    # print(new_name, old_name)
     cur.execute("update staff set name='{}' where name='{}'".format(new_name, old_name))
     conn.commit()
 
 
 def update_employee_password(new_pass, old_name):
-    print(new_pass, old_name)
+    # print(new_pass, old_name)
     cur.execute("update staff set pass='{}' where name='{}'".format(new_pass, old_name))
     conn.commit()
 
 
 def update_employee_salary(new_salary, old_name):
-    print(new_salary, old_name)
+    # print(new_salary, old_name)
     cur.execute(
         "update staff set salary={} where name='{}'".format(new_salary, old_name)
     )
@@ -225,7 +227,7 @@ def update_employee_salary(new_salary, old_name):
 
 
 def update_employee_position(new_pos, old_name):
-    print(new_pos, old_name)
+    # print(new_pos, old_name)
     cur.execute(
         "update staff set position='{}' where name='{}'".format(new_pos, old_name)
     )
