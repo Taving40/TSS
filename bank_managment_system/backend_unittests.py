@@ -7,6 +7,13 @@ import filecmp
 from dump_db import dump_db
 from shutil import copyfile
 
+#TODO: research stubs, mocks, fakes
+
+#TODO: ask prof:
+#                *testing with fors (mby paramaterized testing)
+#                *if using current setup with db stubs is ok 
+#                *if testing only backend would be enough
+
 #TODO: ask abt the following:
 #     *does testing that requires data (the database stubs) suddenly become integration testing instead of unit testing?
 #     *should unit tests instead test that the right method is called with the right params?
@@ -23,6 +30,24 @@ from shutil import copyfile
 #NOTE: the stub dbs in db_stubs shouldnt be worked with directly, but instead a copy should be made and worked with
 #NOTE: The tests that have a dedicated "cleanup" section, have it placed after the assert call intentionally
 #      if the test fails, it will not do the clean up, leaving the relevant files to be looked at to see what went wrong
+
+#NOTE: steps to add a test that follows the Copy-Call-Dump-AssertWithCompare-Cleanup:
+# 1. In File Explorer: Add a database stub file with the name of the test you re writing in the db_stubs folder (not in checks)
+#    This database stubs should have the exact data needed by the function we re testing and no more
+# 2. In the test: add the copyfile(src="name_of_test.db", dst="name_of_test_copy.db") so that the database stub you just
+#    made with all the proper data needed by the function is not going to get changed
+# 3. In the test: assign the proper varaibles to backend.conn and backend.cur (and any other global variables the function uses)
+# 4. In the test: call dump_db("name_of_test_copy.db") to generate a dump of the db file the function we re testing just modified
+#    This is necessary because we cant compare .db files but we can compare .sql dump files
+# 5. In the test: add the assert: self.assertTrue(filecmp.cmp("name_of_test.sql", "db_stubs/checks/name_of_test_check.sql"))
+# 6. In the test: add the cleanup: close the connection to the database, delete the copy database that s been modified by the
+#    function we re testing and delete the .sql dump file we used to compare with our "check" .sql dump file
+# 7: Run the tests with $python backend_unittests.py
+# 8: The test you wrote will fail bcs there is no "check" .sql dump file
+# 9. Add the not yet deleted "name_of_test.sql" dump file to the db_stubs/checks and rename it to have a trailing "_check"
+# 10. Delete the "name_of_test_copy.db" from db_stubs
+# 11. Run the tests again and it should work
+
 
 class BackendUnitTests(unittest.TestCase):
 
@@ -265,7 +290,23 @@ class BackendUnitTests(unittest.TestCase):
         pass
 
     def test_update_name_in_bank_table(self):
-        pass
+        copyfile(src="db_stubs/test_update_name_in_bank_table.db",
+                    dst="db_stubs/test_update_name_in_bank_table_copy.db")
+
+        backend.conn = sqlite3.connect("db_stubs/test_update_name_in_bank_table_copy.db")
+        backend.cur = backend.conn.cursor()
+        backend.update_name_in_bank_table(new_name="new_name", acc_no=1)
+        
+        dump_db("db_stubs/test_update_name_in_bank_table_copy.db", "test_update_name_in_bank_table.sql")
+
+        self.assertTrue(filecmp.cmp(
+            "test_update_name_in_bank_table.sql",
+            "db_stubs/checks/test_update_name_in_bank_table_check.sql"))
+        
+        #cleanup
+        backend.conn.close()
+        os.remove("test_update_name_in_bank_table.sql")
+        os.remove("db_stubs/test_update_name_in_bank_table_copy.db")
 
     def test_update_age_in_bank_table(self):
         pass
