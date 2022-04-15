@@ -266,11 +266,93 @@ class BackendUnitTests(unittest.TestCase):
         os.remove("test_create_customer.sql")
         os.remove("db_stubs/test_create_customer_copy.db")
 
-    def test_check_acc_no(self):
-        pass
 
-    def test_get_details(self):
-        pass
+    #3 teste pentru aceasta functie - 2 pentru if: caz in care numarul se afla in lista, caz in care nu se afla; unul pentru for - lista vida
+    #test pentru if -- numar care se afla in lista
+    def test_check_acc_no_if(self):
+        # make a copy of the stub
+        copyfile(src="db_stubs/test_check_acc_no_if.db",
+                 dst="db_stubs/test_check_acc_no_if_copy.db")
+
+        backend.connect_database("db_stubs/test_check_acc_no_if_copy.db")  # call the function
+
+
+        result = backend.check_acc_no(1)
+        self.assertTrue(result)
+
+        # cleanup
+        backend.conn.close()
+        os.remove("db_stubs/test_check_acc_no_if_copy.db")
+
+    def test_check_acc_no_if_else(self):
+        # make a copy of the stub
+        copyfile(src="db_stubs/test_check_acc_no_if.db",
+                 dst="db_stubs/test_check_acc_no_if_else_copy.db")
+
+        backend.connect_database("db_stubs/test_check_acc_no_if_else_copy.db")  # call the function
+
+        result = backend.check_acc_no(5) #nu se afla in lista
+        self.assertFalse(result)
+
+        # cleanup
+        backend.conn.close()
+        os.remove("db_stubs/test_check_acc_no_if_else_copy.db")
+
+    #lista vida
+    def test_check_acc_no_for(self):
+        # make a copy of the stub
+        copyfile(src="db_stubs/test_check_acc_no_for.db",
+                 dst="db_stubs/test_check_acc_no_for_copy.db")
+
+        backend.connect_database("db_stubs/test_check_acc_no_for_copy.db")  # call the function
+
+        result = backend.check_acc_no(1)
+        self.assertFalse(result)
+
+        # cleanup
+        backend.conn.close()
+        os.remove("db_stubs/test_check_acc_no_for_copy.db")
+
+    #2 cazuri: pentru if- nu exista persoana cu acel acc_number, else - exista
+    def test_get_details_if(self):
+        # make a copy of the stub
+        copyfile(src="db_stubs/test_get_details_if.db",
+                 dst="db_stubs/test_get_details_if_copy.db")
+
+        backend.connect_database("db_stubs/test_get_details_if_copy.db")  # call the function
+
+        result = backend.check_acc_no(5) #nu exista persoana cu acest acc_number
+        self.assertFalse(result)
+
+        # cleanup
+        backend.conn.close()
+        os.remove("db_stubs/test_get_details_if_copy.db")
+
+    def test_get_details_else(self):
+        # make a copy of the stub
+        copyfile(src="db_stubs/test_get_details_else.db",
+                 dst="db_stubs/test_get_details_else_copy.db")
+
+        backend.connect_database("db_stubs/test_get_details_else_copy.db")  # call the function
+
+        backend.conn = sqlite3.connect("db_stubs/test_get_details_else_copy.db")
+        backend.cur = backend.conn.cursor()
+        value_to_insert = (1, "Popescu Ion", 28, "25th Street, NY", 100, "acc_type_1", 1)
+        backend.cur.execute(
+            "insert into bank values(?,?,?,?,?,?,?)",
+            (1, "Popescu Ion", 28, "25th Street, NY", 100, "acc_type_1", 1),
+        )
+        backend.conn.commit()
+        backend.conn.close()
+
+        backend.connect_database("db_stubs/test_get_details_else_copy.db")  # call the function
+        result = backend.get_details(acc_no=1)
+        self.assertEqual(result, value_to_insert)
+
+
+        # cleanup
+        backend.conn.close()
+        os.remove("db_stubs/test_get_details_else_copy.db")
 
     def test_update_balance(self):
         copyfile(src="db_stubs/test_update_balance.db",

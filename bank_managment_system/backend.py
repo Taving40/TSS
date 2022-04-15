@@ -89,7 +89,7 @@ def check_acc_no(acc_no):
 
 # get all details of a particular customer from database
 def get_details(acc_no):
-    cur.execute("select * from bank where acc_no=?", (acc_no))
+    cur.execute("select * from bank where acc_no=?", (acc_no,))
     global detail
     detail = cur.fetchall()
     # print(detail)
@@ -236,7 +236,7 @@ def update_employee_position(new_pos, old_name):
 
 # get name and balance from bank of a particular account number
 def get_detail(acc_no):
-    cur.execute("select name, balance from bank where acc_no=?", (acc_no))
+    cur.execute("select name, balance from bank where acc_no=?", (acc_no,))
     details = cur.fetchall()
     return details
 
