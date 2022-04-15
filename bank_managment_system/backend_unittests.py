@@ -51,6 +51,8 @@ from shutil import copyfile
 
 class BackendUnitTests(unittest.TestCase):
 
+
+
     #test that the global connection object is initialized properly
     def test_connect_database_connection(self):
         #make a copy of the stub
@@ -63,6 +65,28 @@ class BackendUnitTests(unittest.TestCase):
         #cleanup
         backend.conn.close()
         os.remove("db_stubs/test_connect_database_connection_copy.db")
+
+    def test_connect_database_else(self):
+        #make a copy of the stub
+        copyfile(src="db_stubs/test_connect_database_else.db",
+                 dst="db_stubs/test_connect_database_else_copy.db")
+
+        backend.connect_database("db_stubs/test_connect_database_else_copy.db") #call the function
+
+        backend.conn = sqlite3.connect("db_stubs/test_connect_database_else_copy.db")
+        backend.cur = backend.conn.cursor()
+        backend.cur.execute(
+            "insert into bank values(?,?,?,?,?,?,?)",
+            (1, "name", 1, "address", 1, "acc_type", 1),
+        )
+        backend.conn.commit()
+
+        backend.connect_database("db_stubs/test_connect_database_else_copy.db") #call the function for the else branch
+        self.assertEqual(backend.acc_no, 2)
+
+        #cleanup
+        backend.conn.close()
+        os.remove("db_stubs/test_connect_database_else_copy.db")
 
     #test that the global cursor object for the connection is initialized properly
     def test_connect_database_cursor(self):
