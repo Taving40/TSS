@@ -135,7 +135,7 @@ def deduct_balance(new_money, acc_no):
 
 # gave balance of a particular account number from database
 def check_balance(acc_no):
-    cur.execute("select balance from bank where acc_no=?", (acc_no))
+    cur.execute("select balance from bank where acc_no=?", (acc_no,))
     bal = cur.fetchall()
     return bal[0][0]
 

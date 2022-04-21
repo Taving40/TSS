@@ -393,7 +393,21 @@ class BackendUnitTests(unittest.TestCase):
         os.remove("db_stubs/test_update_balance_copy.db")
 
     def test_check_balance(self):
-        pass
+        copyfile(src="db_stubs/test_check_balance.db",
+                 dst="db_stubs/test_check_balance_copy.db")
+
+        #hardcoded result, no query
+        result_from_db = 10000
+
+        backend.connect_database("db_stubs/test_check_balance_copy.db")  # call the function
+        backend.cur = backend.conn.cursor()
+        result = backend.check_balance(acc_no=1)
+
+        self.assertEqual(result,result_from_db)
+
+        # cleanup
+        backend.conn.close()
+        os.remove("db_stubs/test_check_balance_copy.db")
 
     def test_update_name_in_bank_table(self):
         copyfile(src="db_stubs/test_update_name_in_bank_table.db",
@@ -415,10 +429,42 @@ class BackendUnitTests(unittest.TestCase):
         os.remove("db_stubs/test_update_name_in_bank_table_copy.db")
 
     def test_update_age_in_bank_table(self):
-        pass
+        copyfile(src="db_stubs/test_update_age_in_bank_table.db",
+                 dst="db_stubs/test_update_age_in_bank_table_copy.db")
+
+        backend.conn = sqlite3.connect("db_stubs/test_update_age_in_bank_table_copy.db")
+        backend.cur = backend.conn.cursor()
+        backend.update_age_in_bank_table(new_name=39,acc_no=2)
+
+        dump_db("db_stubs/test_update_age_in_bank_table_copy.db", "test_update_age_in_bank_table.sql")
+
+        self.assertTrue(filecmp.cmp(
+            "test_update_age_in_bank_table.sql",
+            "db_stubs/checks/test_update_age_in_bank_table_check.sql"))
+
+        # cleanup
+        backend.conn.close()
+        os.remove("test_update_age_in_bank_table.sql")
+        os.remove("db_stubs/test_update_age_in_bank_table_copy.db")
     
     def test_update_address_in_bank_table(self):
-        pass
+        copyfile(src="db_stubs/test_update_address_in_bank_table.db",
+                 dst="db_stubs/test_update_address_in_bank_table_copy.db")
+
+        backend.conn = sqlite3.connect("db_stubs/test_update_address_in_bank_table_copy.db")
+        backend.cur = backend.conn.cursor()
+        backend.update_address_in_bank_table(new_name="Calea Mosilor 22", acc_no=2)
+
+        dump_db("db_stubs/test_update_address_in_bank_table_copy.db", "test_update_address_in_bank_table.sql")
+
+        self.assertTrue(filecmp.cmp(
+            "test_update_address_in_bank_table.sql",
+            "db_stubs/checks/test_update_address_in_bank_table_check.sql"))
+
+        # cleanup
+        backend.conn.close()
+        os.remove("test_update_address_in_bank_table.sql")
+        os.remove("db_stubs/test_update_address_in_bank_table_copy.db")
 
     def test_list_all_customers(self):
         pass
@@ -436,22 +482,146 @@ class BackendUnitTests(unittest.TestCase):
         pass
 
     def test_update_employee_name(self):
-        pass
+        copyfile(src="db_stubs/test_update_employee_name.db",
+                 dst="db_stubs/test_update_employee_name_copy.db")
+
+        backend.conn = sqlite3.connect("db_stubs/test_update_employee_name_copy.db")
+        backend.cur = backend.conn.cursor()
+        backend.update_employee_name(new_name="Ionescu Mirela-Oana", old_name="Ionescu Mirela")
+
+        dump_db("db_stubs/test_update_employee_name_copy.db", "test_update_employee_name.sql")
+
+        self.assertTrue(filecmp.cmp(
+            "test_update_employee_name.sql",
+            "db_stubs/checks/test_update_employee_name_check.sql"))
+
+        # cleanup
+        backend.conn.close()
+        os.remove("test_update_employee_name.sql")
+        os.remove("db_stubs/test_update_employee_name_copy.db")
     
     def test_update_employee_password(self):
-        pass
+        copyfile(src="db_stubs/test_update_employee_password.db",
+                 dst="db_stubs/test_update_employee_password_copy.db")
+
+        backend.conn = sqlite3.connect("db_stubs/test_update_employee_password_copy.db")
+        backend.cur = backend.conn.cursor()
+        backend.update_employee_password(new_pass="newpassword", old_name="Ionescu Mirela")
+
+        dump_db("db_stubs/test_update_employee_password_copy.db", "test_update_employee_password.sql")
+
+        self.assertTrue(filecmp.cmp(
+            "test_update_employee_password.sql",
+            "db_stubs/checks/test_update_employee_password_check.sql"))
+
+        # cleanup
+        backend.conn.close()
+        os.remove("test_update_employee_password.sql")
+        os.remove("db_stubs/test_update_employee_password_copy.db")
 
     def test_update_employee_salary(self):
-        pass
+        copyfile(src="db_stubs/test_update_employee_salary.db",
+                 dst="db_stubs/test_update_employee_salary_copy.db")
+
+        backend.conn = sqlite3.connect("db_stubs/test_update_employee_salary_copy.db")
+        backend.cur = backend.conn.cursor()
+        backend.update_employee_salary(new_salary=3000, old_name="Ionescu Mirela")
+
+        dump_db("db_stubs/test_update_employee_salary_copy.db", "test_update_employee_salary.sql")
+
+        self.assertTrue(filecmp.cmp(
+            "test_update_employee_salary.sql",
+            "db_stubs/checks/test_update_employee_salary_check.sql"))
+
+        # cleanup
+        backend.conn.close()
+        os.remove("test_update_employee_salary.sql")
+        os.remove("db_stubs/test_update_employee_salary_copy.db")
 
     def test_update_employee_position(self):
-        pass
+        copyfile(src="db_stubs/test_update_employee_position.db",
+                 dst="db_stubs/test_update_employee_position_copy.db")
+
+        backend.conn = sqlite3.connect("db_stubs/test_update_employee_position_copy.db")
+        backend.cur = backend.conn.cursor()
+        backend.update_employee_position(new_pos="manager",old_name="Popescu Maria")
+
+        dump_db("db_stubs/test_update_employee_position_copy.db", "test_update_employee_position.sql")
+
+        self.assertTrue(filecmp.cmp(
+            "test_update_employee_position.sql",
+            "db_stubs/checks/test_update_employee_position_check.sql"))
+
+        # cleanup
+        backend.conn.close()
+        os.remove("test_update_employee_position.sql")
+        os.remove("db_stubs/test_update_employee_position_copy.db")
 
     def test_get_detail(self):
-        pass
+        # make a copy of the stub
+        copyfile(src="db_stubs/test_check_get_detail.db",
+                 dst="db_stubs/test_check_get_detail_copy.db")
 
-    def test_check_name_in_staff(self):
-        pass
+        #result from db, no query
+        result_from_db = [("Lungu Elena", 10000)]
+
+        backend.connect_database("db_stubs/test_check_get_detail_copy.db")  # call the function
+
+        result = backend.get_detail(acc_no=1)
+        self.assertEqual(result,result_from_db)
+
+        # cleanup
+        backend.conn.close()
+        os.remove("db_stubs/test_check_get_detail_copy.db")
+
+    #cazul in care numele se afla in lista
+    def test_check_name_in_staff_if(self):
+        # make a copy of the stub
+        copyfile(src="db_stubs/test_check_name_in_staff_if.db",
+                 dst="db_stubs/test_check_name_in_staff_if_copy.db")
+
+        backend.connect_database("db_stubs/test_check_name_in_staff_if_copy.db")  # call the function
+
+        result = backend.check_name_in_staff("Ionescu Mirela")
+        self.assertTrue(result)
+
+        # cleanup
+        backend.conn.close()
+        os.remove("db_stubs/test_check_name_in_staff_if_copy.db")
+
+    #cazul in care numele nu exista in lista
+    def test_check_name_in_staff_else(self):
+        # make a copy of the stub
+        copyfile(src="db_stubs/test_check_name_in_staff_else.db",
+                 dst="db_stubs/test_check_name_in_staff_else_copy.db")
+
+        backend.connect_database("db_stubs/test_check_name_in_staff_else_copy.db")  # call the function
+
+        result = backend.check_name_in_staff("Rusu Mihai")
+        self.assertFalse(result)
+
+        # cleanup
+        backend.conn.close()
+        os.remove("db_stubs/test_check_name_in_staff_else_copy.db")
+
+    #cazul in care avem lista vida
+    def test_check_name_in_staff_for(self):
+        # make a copy of the stub
+        copyfile(src="db_stubs/test_check_name_in_staff_for.db",
+                 dst="db_stubs/test_check_name_in_staff_for_copy.db")
+
+        backend.connect_database("db_stubs/test_check_name_in_staff_for_copy.db")  # call the function
+
+        result = backend.check_name_in_staff("Rusu Mihai")
+        self.assertFalse(result)
+
+        # cleanup
+        backend.conn.close()
+        os.remove("db_stubs/test_check_name_in_staff_for_copy.db")
+
+
+
+
 
 
 if __name__ == '__main__':
