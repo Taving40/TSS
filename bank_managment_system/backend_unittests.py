@@ -16,11 +16,11 @@ from shutil import copyfile
 
 #TODO: ask abt the following:
 #     *does testing that requires data (the database stubs) suddenly become integration testing instead of unit testing?
+#      ANSWER: kind of, but it's not an issue for the project
 #     *should unit tests instead test that the right method is called with the right params?
-# Pretty sure the second answer from this thread says that the way Im doing it is right: https://softwareengineering.stackexchange.com/questions/206539/unit-tests-and-databases-at-which-point-do-i-actually-connect-to-the-database
-# Hopefully prof agrees
-
-#Links: https://stackoverflow.com/questions/145131/whats-the-best-strategy-for-unit-testing-database-driven-applications?rq=1
+#      ANSWER: we will do both (depending on the effects of the function being tested)
+# For doc: https://softwareengineering.stackexchange.com/questions/206539/unit-tests-and-databases-at-which-point-do-i-actually-connect-to-the-database
+# https://stackoverflow.com/questions/145131/whats-the-best-strategy-for-unit-testing-database-driven-applications?rq=1
 # https://stackoverflow.com/questions/71641581/approaches-for-unit-testing-db-components
 # https://softwareengineering.stackexchange.com/questions/206539/unit-tests-and-databases-at-which-point-do-i-actually-connect-to-the-database
 
@@ -47,6 +47,7 @@ from shutil import copyfile
 # 9. Add the not yet deleted "name_of_test.sql" dump file to the db_stubs/checks and rename it to have a trailing "_check"
 # 10. Delete the "name_of_test_copy.db" from db_stubs
 # 11. Run the tests again and it should work
+
 
 
 class BackendUnitTests(unittest.TestCase):
