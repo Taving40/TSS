@@ -541,8 +541,47 @@ class BackendUnitTests(unittest.TestCase):
         backend.conn.close()
         os.remove("db_stubs/test_show_employees_copy.db")
 
-    def test_all_money(self):
-        pass
+    def test_all_money_if(self):
+        copyfile(src="db_stubs/test_all_money.db",
+                 dst="db_stubs/test_all_money_if_copy.db")
+
+        backend.connect_database("db_stubs/test_all_money_if_copy.db")
+        result = backend.all_money()
+
+        self.assertFalse(result)
+
+        # cleanup
+        backend.conn.close()
+        os.remove("db_stubs/test_all_money_if_copy.db")
+
+    def test_all_money_else(self):
+        copyfile(src="db_stubs/test_all_money.db",
+                 dst="db_stubs/test_all_money_else_copy.db")
+
+        backend.conn = sqlite3.connect("db_stubs/test_all_money_else_copy.db")
+        backend.cur = backend.conn.cursor()
+        values_to_insert = [(1, "Popescu Ion", 28, "25th Street, NY", 100, "acc_type_1", 1),
+                            (2, "Ionescu Ion", 23, "28th Street, NY", 500, "acc_type_1", 1)]
+
+        total = 0
+        for value in values_to_insert:
+            backend.cur.execute(
+                "insert into bank values(?,?,?,?,?,?,?)",
+                value,
+            )
+            total = total + value[4]
+
+        backend.conn.commit()
+        backend.conn.close()
+
+        backend.connect_database("db_stubs/test_all_money_else_copy.db")
+        result = backend.all_money()
+
+        self.assertEqual(result, total)
+
+        # cleanup
+        backend.conn.close()
+        os.remove("db_stubs/test_all_money_else_copy.db")
 
     def test_show_employees_for_update(self):
         copyfile(src="db_stubs/test_show_employees_for_update.db",
