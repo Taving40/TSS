@@ -173,7 +173,7 @@ def list_all_customers():
 
 # delete account from database
 def delete_acc(acc_no):
-    cur.execute("delete from bank where acc_no=?", (acc_no))
+    cur.execute("delete from bank where acc_no=?", (acc_no,))
     conn.commit()
 
 

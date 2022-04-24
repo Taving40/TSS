@@ -2,9 +2,9 @@ import unittest
 import sqlite3
 import os
 from unittest.mock import patch, MagicMock
-import backend
+import bank_managment_system.backend as backend
 import filecmp
-from dump_db import dump_db
+from bank_managment_system.dump_db import dump_db
 from shutil import copyfile
 
 #TODO: research stubs, mocks, fakes
@@ -468,19 +468,148 @@ class BackendUnitTests(unittest.TestCase):
         os.remove("db_stubs/test_update_address_in_bank_table_copy.db")
 
     def test_list_all_customers(self):
-        pass
+        copyfile(src="db_stubs/test_list_all_customers.db",
+                 dst="db_stubs/test_list_all_customers_copy.db")
+
+        backend.conn = sqlite3.connect("db_stubs/test_list_all_customers_copy.db")
+        backend.cur = backend.conn.cursor()
+        values_to_insert = [(1, "Popescu Ion", 28, "25th Street, NY", 100, "acc_type_1", 1),
+                           (2, "Ionescu Ion", 23, "28th Street, NY", 500, "acc_type_1", 1)]
+
+        for value in values_to_insert:
+            backend.cur.execute(
+                "insert into bank values(?,?,?,?,?,?,?)",
+                value,
+            )
+
+        backend.conn.commit()
+        backend.conn.close()
+
+        backend.connect_database("db_stubs/test_list_all_customers_copy.db")
+        result = backend.list_all_customers()
+
+        self.assertEqual(result, values_to_insert)
+
+        # cleanup
+        backend.conn.close()
+        os.remove("db_stubs/test_list_all_customers_copy.db")
 
     def test_delete_acc(self):
-        pass
+        copyfile(src="db_stubs/test_delete_acc.db",
+                 dst="db_stubs/test_delete_acc_copy.db")
+
+        backend.conn = sqlite3.connect("db_stubs/test_delete_acc_copy.db")
+        backend.cur = backend.conn.cursor()
+        backend.delete_acc(1)
+
+        dump_db("db_stubs/test_delete_acc_copy.db", "test_delete_acc.sql")
+
+        self.assertTrue(filecmp.cmp(
+            "test_delete_acc.sql",
+            "db_stubs/checks/test_delete_acc_check.sql"))
+
+        # cleanup
+        backend.conn.close()
+        os.remove("test_delete_acc.sql")
+        os.remove("db_stubs/test_delete_acc_copy.db")
 
     def test_show_employees(self):
-        pass
+        copyfile(src="db_stubs/test_show_employees.db",
+                 dst="db_stubs/test_show_employees_copy.db")
 
-    def test_all_money(self):
-        pass
+        backend.conn = sqlite3.connect("db_stubs/test_show_employees_copy.db")
+        backend.cur = backend.conn.cursor()
+        values_to_insert = [('Popescu Maria',1500,'banker','pass'),
+                            ('Ionescu Mirela-Oana',2500,'loan officer','pass1234'),
+                            ('Alexandrovici Alexandru',2500,'loan officer','pass4321')]
+
+        for value in values_to_insert:
+            backend.cur.execute(
+                "insert into staff (name, salary, position, pass) values(?,?,?,?)",
+                value,
+            )
+
+        backend.conn.commit()
+        backend.conn.close()
+
+        backend.connect_database("db_stubs/test_show_employees_copy.db")
+        result = backend.show_employees()
+
+        self.assertEqual(result, values_to_insert)
+
+        # cleanup
+        backend.conn.close()
+        os.remove("db_stubs/test_show_employees_copy.db")
+
+    def test_all_money_if(self):
+        copyfile(src="db_stubs/test_all_money.db",
+                 dst="db_stubs/test_all_money_if_copy.db")
+
+        backend.connect_database("db_stubs/test_all_money_if_copy.db")
+        result = backend.all_money()
+
+        self.assertFalse(result)
+
+        # cleanup
+        backend.conn.close()
+        os.remove("db_stubs/test_all_money_if_copy.db")
+
+    def test_all_money_else(self):
+        copyfile(src="db_stubs/test_all_money.db",
+                 dst="db_stubs/test_all_money_else_copy.db")
+
+        backend.conn = sqlite3.connect("db_stubs/test_all_money_else_copy.db")
+        backend.cur = backend.conn.cursor()
+        values_to_insert = [(1, "Popescu Ion", 28, "25th Street, NY", 100, "acc_type_1", 1),
+                            (2, "Ionescu Ion", 23, "28th Street, NY", 500, "acc_type_1", 1)]
+
+        total = 0
+        for value in values_to_insert:
+            backend.cur.execute(
+                "insert into bank values(?,?,?,?,?,?,?)",
+                value,
+            )
+            total = total + value[4]
+
+        backend.conn.commit()
+        backend.conn.close()
+
+        backend.connect_database("db_stubs/test_all_money_else_copy.db")
+        result = backend.all_money()
+
+        self.assertEqual(result, total)
+
+        # cleanup
+        backend.conn.close()
+        os.remove("db_stubs/test_all_money_else_copy.db")
 
     def test_show_employees_for_update(self):
-        pass
+        copyfile(src="db_stubs/test_show_employees_for_update.db",
+                 dst="db_stubs/test_show_employees_for_update_copy.db")
+
+        backend.conn = sqlite3.connect("db_stubs/test_show_employees_for_update_copy.db")
+        backend.cur = backend.conn.cursor()
+        values_to_insert = [('Popescu Maria', 'pass', 1500, 'banker'),
+                            ('Ionescu Mirela-Oana', 'pass1234', 2500, 'loan officer'),
+                            ('Alexandrovici Alexandru', 'pass4321', 2500, 'loan officer')]
+
+        for value in values_to_insert:
+            backend.cur.execute(
+                "insert into staff values(?,?,?,?)",
+                value,
+            )
+
+        backend.conn.commit()
+        backend.conn.close()
+
+        backend.connect_database("db_stubs/test_show_employees_for_update_copy.db")
+        result = backend.show_employees_for_update()
+
+        self.assertEqual(result, values_to_insert)
+
+        # cleanup
+        backend.conn.close()
+        os.remove("db_stubs/test_show_employees_for_update_copy.db")
 
     def test_update_employee_name(self):
         copyfile(src="db_stubs/test_update_employee_name.db",
