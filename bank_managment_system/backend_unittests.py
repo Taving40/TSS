@@ -2,9 +2,11 @@ import unittest
 import sqlite3
 import os
 from unittest.mock import patch, MagicMock
-import bank_managment_system.backend as backend
+# import bank_managment_system.backend as backend
+import backend
 import filecmp
-from bank_managment_system.dump_db import dump_db
+# from bank_managment_system.dump_db import dump_db
+from dump_db import dump_db
 from shutil import copyfile
 
 #TODO: research stubs, mocks, fakes
@@ -322,7 +324,7 @@ class BackendUnitTests(unittest.TestCase):
 
         backend.connect_database("db_stubs/test_get_details_if_copy.db")  # call the function
 
-        result = backend.check_acc_no(5) #nu exista persoana cu acest acc_number
+        result = backend.get_details(5) #nu exista persoana cu acest acc_number
         self.assertFalse(result)
 
         # cleanup
