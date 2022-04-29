@@ -148,9 +148,9 @@ def update_name_in_bank_table(new_name, acc_no):
 
 
 # update_age_in_bank_table
-def update_age_in_bank_table(new_name, acc_no):
-    # print(new_name)
-    conn.execute("update bank set age={} where acc_no={}".format(new_name, acc_no))
+def update_age_in_bank_table(new_age, acc_no):
+    # print(new_age)
+    conn.execute("update bank set age={} where acc_no={}".format(new_age, acc_no))
     conn.commit()
 
 

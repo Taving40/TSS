@@ -9,34 +9,22 @@ import filecmp
 from dump_db import dump_db
 from shutil import copyfile
 
-#TODO: research stubs, mocks, fakes
-
-#TODO: ask prof:
-#                *testing with fors (mby paramaterized testing)
-#                *if using current setup with db stubs is ok 
-#                *if testing only backend would be enough
-
-#TODO: ask abt the following:
-#     *does testing that requires data (the database stubs) suddenly become integration testing instead of unit testing?
-#      ANSWER: kind of, but it's not an issue for the project
-#     *should unit tests instead test that the right method is called with the right params?
-#      ANSWER: we will do both (depending on the effects of the function being tested)
 # For doc:
 # https://stackoverflow.com/questions/145131/whats-the-best-strategy-for-unit-testing-database-driven-applications?rq=1
 # https://stackoverflow.com/questions/71641581/approaches-for-unit-testing-db-components
 # https://softwareengineering.stackexchange.com/questions/206539/unit-tests-and-databases-at-which-point-do-i-actually-connect-to-the-database
 
 #NOTE: remember to keep each test entirely self-contained
-#NOTE: functions that are explicitly supposed to modify the database will be tested using stubs
+#NOTE: functions that are explicitly supposed to modify the database will be tested using mocks
 #      (in db_mocks subdirectory) since the actual thing being tested is the query 
-#NOTE: the stub dbs in db_mocks shouldnt be worked with directly, but instead a copy should be made and worked with
+#NOTE: the mock dbs in db_mocks shouldnt be worked with directly, but instead a copy should be made and worked with
 #NOTE: The tests that have a dedicated "cleanup" section, have it placed after the assert call intentionally
 #      if the test fails, it will not do the clean up, leaving the relevant files to be looked at to see what went wrong
 
 #NOTE: steps to add a test that follows the Copy-Call-Dump-AssertWithCompare-Cleanup:
-# 1. In File Explorer: Add a database stub file with the name of the test you re writing in the db_mocks folder (not in checks)
-#    This database stubs should have the exact data needed by the function we re testing and no more
-# 2. In the test: add the copyfile(src="name_of_test.db", dst="name_of_test_copy.db") so that the database stub you just
+# 1. In File Explorer: Add a database mock file with the name of the test you re writing in the db_mocks folder (not in checks)
+#    This database mocks should have the exact data needed by the function we re testing and no more
+# 2. In the test: add the copyfile(src="name_of_test.db", dst="name_of_test_copy.db") so that the database mock you just
 #    made with all the proper data needed by the function is not going to get changed
 # 3. In the test: assign the proper varaibles to backend.conn and backend.cur (and any other global variables the function uses)
 # 4. In the test: call dump_db("name_of_test_copy.db") to generate a dump of the db file the function we re testing just modified
@@ -56,7 +44,7 @@ class BackendUnitTests(unittest.TestCase):
 
     #test that the global connection object is initialized properly
     def test_connect_database_connection(self):
-        #make a copy of the stub
+        #make a copy of the mock
         copyfile(src="db_mocks/test_connect_database_connection.db",
                  dst="db_mocks/test_connect_database_connection_copy.db")
 
@@ -68,7 +56,7 @@ class BackendUnitTests(unittest.TestCase):
         os.remove("db_mocks/test_connect_database_connection_copy.db")
 
     def test_connect_database_else(self):
-        #make a copy of the stub
+        #make a copy of the mock
         copyfile(src="db_mocks/test_connect_database_else.db",
                  dst="db_mocks/test_connect_database_else_copy.db")
 
@@ -91,7 +79,7 @@ class BackendUnitTests(unittest.TestCase):
 
     #test that the global cursor object for the connection is initialized properly
     def test_connect_database_cursor(self):
-        #make a copy of the stub
+        #make a copy of the mock
         copyfile(src="db_mocks/test_connect_database_cursor.db",
                  dst="db_mocks/test_connect_database_cursor_copy.db")
 
@@ -104,7 +92,7 @@ class BackendUnitTests(unittest.TestCase):
 
     #test that the global account number object is initialized properly
     def test_connect_database_account_number(self): 
-        #make a copy of the stub
+        #make a copy of the mock
         copyfile(src="db_mocks/test_connect_database_account_number.db",
                  dst="db_mocks/test_connect_database_account_number_copy.db")
 
@@ -117,7 +105,7 @@ class BackendUnitTests(unittest.TestCase):
 
     #test that the global account number object has proper value
     def test_connect_database_account_number_value(self):
-        #make a copy of the stub
+        #make a copy of the mock
         copyfile(src="db_mocks/test_connect_database_account_number_value.db",
                  dst="db_mocks/test_connect_database_account_number_value_copy.db")
 
@@ -130,7 +118,7 @@ class BackendUnitTests(unittest.TestCase):
 
     #test that all the tables were created
     def test_connect_database_table_creation(self):
-        #make a copy of the stub
+        #make a copy of the mock
         copyfile(src="db_mocks/test_connect_database_table_creation.db",
                  dst="db_mocks/test_connect_database_table_creation_copy.db")
 
@@ -148,7 +136,7 @@ class BackendUnitTests(unittest.TestCase):
         os.remove("db_mocks/test_connect_database_table_creation_copy.db")
         os.remove("test_table_creation.sql")
 
-    #NOTE: Having tested connect_database(), the rest of the tests can use mocks to avoid adding more database stubs (where possible)
+    #NOTE: Having tested connect_database(), the rest of the tests can use mocks to avoid adding more database mocks (where possible)
 
     def test_check_admin_true(self):
         backend.conn = MagicMock()
@@ -205,7 +193,7 @@ class BackendUnitTests(unittest.TestCase):
         os.remove("test_create_employee.sql")
         os.remove("db_mocks/test_create_employee_copy.db")
 
-    def test_check_employee_true(self):
+    def test_check_employee_if1f_if2t(self):
         backend.conn = MagicMock()
         backend.cur = MagicMock()
         backend.cur.fetchall = MagicMock( #mocking the call to the db that returns the admin credentials
@@ -218,22 +206,17 @@ class BackendUnitTests(unittest.TestCase):
                 ]
         )
         self.assertTrue(backend.check_employee("employee1", "password1"))
-
-    def test_check_employee_wrong_pass(self):
-        backend.conn = MagicMock()
-        backend.cur = MagicMock()
-        backend.cur.fetchall = MagicMock( #mocking the call to the db that returns the admin credentials
-            return_value =    
-                [
-                    ["employee1",
-                    "password1"],
-                    ["employee2",
-                    "password2"]
-                ]
-        )
-        self.assertFalse(backend.check_employee("employee1", "password3"))
     
-    def test_check_employee_wrong_user(self):
+    def test_check_employee_if1t(self):
+        backend.conn = MagicMock()
+        backend.cur = MagicMock()
+        backend.cur.fetchall = MagicMock( #mocking the call to the db that returns the admin credentials
+            return_value =    
+                []
+        )
+        self.assertFalse(backend.check_employee("employee1", "password1"))
+    
+    def test_check_employee_if1f_if2f(self):
         backend.conn = MagicMock()
         backend.cur = MagicMock()
         backend.cur.fetchall = MagicMock( #mocking the call to the db that returns the admin credentials
@@ -245,7 +228,7 @@ class BackendUnitTests(unittest.TestCase):
                     "password2"]
                 ]
         )
-        self.assertFalse(backend.check_employee("employee3", "password1"))
+        self.assertFalse(backend.check_employee("employee3", "password3"))
 
     def test_create_customer(self):
         copyfile(src="db_mocks/test_create_customer.db",
@@ -267,11 +250,10 @@ class BackendUnitTests(unittest.TestCase):
         os.remove("test_create_customer.sql")
         os.remove("db_mocks/test_create_customer_copy.db")
 
-
     #3 teste pentru aceasta functie - 2 pentru if: caz in care numarul se afla in lista, caz in care nu se afla; unul pentru for - lista vida
     #test pentru if -- numar care se afla in lista
     def test_check_acc_no_if(self):
-        # make a copy of the stub
+        # make a copy of the mock
         copyfile(src="db_mocks/test_check_acc_no_if.db",
                  dst="db_mocks/test_check_acc_no_if_copy.db")
 
@@ -286,7 +268,7 @@ class BackendUnitTests(unittest.TestCase):
         os.remove("db_mocks/test_check_acc_no_if_copy.db")
 
     def test_check_acc_no_if_else(self):
-        # make a copy of the stub
+        # make a copy of the mock
         copyfile(src="db_mocks/test_check_acc_no_if.db",
                  dst="db_mocks/test_check_acc_no_if_else_copy.db")
 
@@ -301,7 +283,7 @@ class BackendUnitTests(unittest.TestCase):
 
     #lista vida
     def test_check_acc_no_for(self):
-        # make a copy of the stub
+        # make a copy of the mock
         copyfile(src="db_mocks/test_check_acc_no_for.db",
                  dst="db_mocks/test_check_acc_no_for_copy.db")
 
@@ -316,7 +298,7 @@ class BackendUnitTests(unittest.TestCase):
 
     #2 cazuri: pentru if- nu exista persoana cu acel acc_number, else - exista
     def test_get_details_if(self):
-        # make a copy of the stub
+        # make a copy of the mock
         copyfile(src="db_mocks/test_get_details_if.db",
                  dst="db_mocks/test_get_details_if_copy.db")
 
@@ -330,7 +312,7 @@ class BackendUnitTests(unittest.TestCase):
         os.remove("db_mocks/test_get_details_if_copy.db")
 
     def test_get_details_else(self):
-        # make a copy of the stub
+        # make a copy of the mock
         copyfile(src="db_mocks/test_get_details_else.db",
                  dst="db_mocks/test_get_details_else_copy.db")
 
@@ -435,7 +417,7 @@ class BackendUnitTests(unittest.TestCase):
 
         backend.conn = sqlite3.connect("db_mocks/test_update_age_in_bank_table_copy.db")
         backend.cur = backend.conn.cursor()
-        backend.update_age_in_bank_table(new_name=39,acc_no=2)
+        backend.update_age_in_bank_table(new_age=39,acc_no=2)
 
         dump_db("db_mocks/test_update_age_in_bank_table_copy.db", "test_update_age_in_bank_table.sql")
 
@@ -688,7 +670,7 @@ class BackendUnitTests(unittest.TestCase):
         os.remove("db_mocks/test_update_employee_position_copy.db")
 
     def test_get_detail(self):
-        # make a copy of the stub
+        # make a copy of the mock
         copyfile(src="db_mocks/test_check_get_detail.db",
                  dst="db_mocks/test_check_get_detail_copy.db")
 
@@ -706,7 +688,7 @@ class BackendUnitTests(unittest.TestCase):
 
     #cazul in care numele se afla in lista
     def test_check_name_in_staff_if(self):
-        # make a copy of the stub
+        # make a copy of the mock
         copyfile(src="db_mocks/test_check_name_in_staff_if.db",
                  dst="db_mocks/test_check_name_in_staff_if_copy.db")
 
@@ -721,7 +703,7 @@ class BackendUnitTests(unittest.TestCase):
 
     #cazul in care numele nu exista in lista
     def test_check_name_in_staff_else(self):
-        # make a copy of the stub
+        # make a copy of the mock
         copyfile(src="db_mocks/test_check_name_in_staff_else.db",
                  dst="db_mocks/test_check_name_in_staff_else_copy.db")
 
@@ -736,7 +718,7 @@ class BackendUnitTests(unittest.TestCase):
 
     #cazul in care avem lista vida
     def test_check_name_in_staff_for(self):
-        # make a copy of the stub
+        # make a copy of the mock
         copyfile(src="db_mocks/test_check_name_in_staff_for.db",
                  dst="db_mocks/test_check_name_in_staff_for_copy.db")
 
@@ -778,7 +760,7 @@ class BackendUnitTests(unittest.TestCase):
 
         set_up()
         db_path = "db_mocks/functional/test_connect_database_exists"
-        #make a copy of the stub
+        #make a copy of the mock
         copyfile(src=f"{db_path}.db",
                  dst=f"{db_path}_copy.db")
 
@@ -793,7 +775,7 @@ class BackendUnitTests(unittest.TestCase):
 
         set_up()
         db_path = "db_mocks/functional/test_connect_database_exists"
-        #make a copy of the stub
+        #make a copy of the mock
         copyfile(src=f"{db_path}",
                  dst=f"{db_path}_copy")
 
