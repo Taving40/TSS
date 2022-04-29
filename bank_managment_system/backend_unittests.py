@@ -436,7 +436,7 @@ class BackendUnitTests(unittest.TestCase):
 
         backend.conn = sqlite3.connect("db_mocks/test_update_address_in_bank_table_copy.db")
         backend.cur = backend.conn.cursor()
-        backend.update_address_in_bank_table(new_name="Calea Mosilor 22", acc_no=2)
+        backend.update_address_in_bank_table(new_address="Calea Mosilor 22", acc_no=2)
 
         dump_db("db_mocks/test_update_address_in_bank_table_copy.db", "test_update_address_in_bank_table.sql")
 
