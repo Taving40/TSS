@@ -356,23 +356,42 @@ class BackendUnitTests(unittest.TestCase):
         os.remove("test_update_balance.sql")
         os.remove("db_mocks/test_update_balance_copy.db")
 
-    def test_deduct_balance(self):
+    def test_deduct_balance_iff(self):
         copyfile(src="db_mocks/test_update_balance.db",
                  dst="db_mocks/test_update_balance_copy.db")
 
         backend.conn = sqlite3.connect("db_mocks/test_update_balance_copy.db")
         backend.cur = backend.conn.cursor()
-        backend.update_balance(new_money=2, acc_no=1)
+        self.assertTrue(backend.deduct_balance(new_money=1, acc_no=1))
         
-        dump_db("db_mocks/test_update_balance_copy.db", "test_update_balance.sql")
+        dump_db("db_mocks/test_update_balance_copy.db", "test_deduct_balance_iff.sql")
 
         self.assertTrue(filecmp.cmp(
-            "test_update_balance.sql",
-            "db_mocks/checks/test_update_balance_check.sql"))
+            "test_deduct_balance_iff.sql",
+            "db_mocks/checks/test_deduct_balance_iff_check.sql"))
         
         #cleanup
         backend.conn.close()
-        os.remove("test_update_balance.sql")
+        os.remove("test_deduct_balance_iff.sql")
+        os.remove("db_mocks/test_update_balance_copy.db")
+
+    def test_deduct_balance_ift(self):
+        copyfile(src="db_mocks/test_update_balance.db",
+                 dst="db_mocks/test_update_balance_copy.db")
+
+        backend.conn = sqlite3.connect("db_mocks/test_update_balance_copy.db")
+        backend.cur = backend.conn.cursor()
+        self.assertFalse(backend.deduct_balance(new_money=2, acc_no=1))
+        
+        dump_db("db_mocks/test_update_balance_copy.db", "test_deduct_balance_ift.sql")
+
+        self.assertTrue(filecmp.cmp(
+            "test_deduct_balance_ift.sql",
+            "db_mocks/checks/test_deduct_balance_ift_check.sql"))
+        
+        #cleanup
+        backend.conn.close()
+        os.remove("test_deduct_balance_ift.sql")
         os.remove("db_mocks/test_update_balance_copy.db")
 
     def test_check_balance(self):
